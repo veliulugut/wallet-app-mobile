@@ -1,25 +1,12 @@
-import express from "express"
-import dotenv from "dotenv"
-import cors from "cors"
-import {sql} from "./config/db.js"
-import rateLimiter from "./middleware/rateLimiter.js";
+import {neon} from  "@neondatabase/serverless";
 
-import transactionsRoute from "./routes/transactionsRoute.js";
-
-dotenv.config();
+import "dotenv/config";
 
 
-const app = express();
-
-//middleware
-app.use(cors());
-app.use(rateLimiter);
-app.use(express.json());
-
-const PORT = process.env.PORT;
+export const sql = neon(process.env.DATABASE_URL);
 
 
-async function initDB() {
+export async function initDB() {
     try {
         await sql`
             CREATE TABLE IF NOT EXISTS transactions (
@@ -37,12 +24,3 @@ async function initDB() {
         process.exit(1);
     }
 };
-
-app.use("/api/transactions", transactionsRoute);
-
-
-initDB().then(() =>{
-    app.listen(PORT,()=>{
-    console.log("Server is up and running",PORT);
-});
-});
